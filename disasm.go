@@ -1,29 +1,17 @@
-package main
+package disasm
 
 // #include "disasm.h"
 import "C"
 
-import "fmt"
+type DisAsmPtr uintptr
+type DisAsmInfoType C.struct_DisAsmInfo;
 
-func main() {
-	// Two dummy functions that "bracket" disasm.c (for demonstration purposes)
-        start := uintptr(C.DisAsmCommencement);
-        end   := uintptr(C.DisAsmFin);
+func DisAsmInfoInit(disAsmInfoPtr *DisAsmInfoType, start DisAsmPtr, end DisAsmPtr) {
+	C.DisAsmInfoInit(disAsmInfoPtr, start, end);
+	return;
+} // DisAsmInfoInit()
 
-	var DisAsmInfo C.struct_DisAsmInfo
-	C.DisAsmInfoInit(&DisAsmInfo, start, end);
-
-	gadgets := 0;
-	for pc := start; pc < end; pc = pc + 1 {
-		instructions := C.DisAsmPrintGadget(&DisAsmInfo, pc, 0);
-
-		if (instructions > 0) {
-			fmt.Printf("GADGET AT: %x (Length: %d)\n", pc, instructions);
-			C.DisAsmPrintGadget(&DisAsmInfo, pc, 1);
-			fmt.Printf("\n");
-			gadgets++;
-		} // if
-	} // for 
-
-	fmt.Printf("GADGET COUNT BETWEEN 0x%x and 0x%x: %d (%d%%)\n", start, end, gadgets, gadgets * 100 / int((uintptr(end) - uintptr(start))));
-} // main()
+func DisAsmPrintGadget(disAsmInfoPtr *DisAsmInfoType, pc DisAsmPtr, doPrint bool) int {
+	var b C.int; if doPrint { b = 1; } else { b = 0; } 
+	return int(C.DisAsmPrintGadget(disAsmInfoPtr, pc, b));
+} // DisAsmPrintGadget()
