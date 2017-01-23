@@ -1,3 +1,6 @@
+# Binary
+disasm
+
 # Object files
 *.o
 *.ko

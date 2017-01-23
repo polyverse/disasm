@@ -1,12 +1,12 @@
 package main
 
-// #include "DisAsm.h"
+// #include "disasm.h"
 import "C"
 
 import "fmt"
-//import "unsafe"
 
 func main() {
+	// Two dummy functions that "bracket" disasm.c (for demonstration purposes)
         start := uintptr(C.DisAsmCommencement);
         end   := uintptr(C.DisAsmFin);
 
@@ -25,5 +25,5 @@ func main() {
 		} // if
 	} // for 
 
-	fmt.Printf("GADGET COUNT BETWEEN %x and %x: %d (%d%%)\n", start, end, gadgets, gadgets * 100 / int((uintptr(end) - uintptr(start))));
+	fmt.Printf("GADGET COUNT BETWEEN 0x%x and 0x%x: %d (%d%%)\n", start, end, gadgets, gadgets * 100 / int((uintptr(end) - uintptr(start))));
 } // main()

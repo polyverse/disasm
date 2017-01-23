@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <memory.h>
 #include <stdarg.h>
-#include "DisAsm.h"
+#include "disasm.h"
 
 static void DisAsmPrintAddress(bfd_vma addr, struct disassemble_info *info)
 {
