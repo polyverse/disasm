@@ -4,8 +4,6 @@
 
 typedef void *DisAsmPtr;
 
-static unsigned char *memory = 0;
-
 typedef struct DisAsmPrintBuffer {
 	int	index;
 	char	data[1024];
@@ -14,7 +12,9 @@ typedef struct DisAsmPrintBuffer {
 typedef struct DisAsmInfo {
 	disassemble_info info;
 	DisAsmPrintBufferType disAsmPrintBuffer;
-} DisAsmInfoType, *DisAsmInfoPtr;
+} DisAsmInfoType;
 
-extern void DisAsmInfoInit(DisAsmInfoPtr disAsmInfoPtr, DisAsmPtr start, DisAsmPtr end);
-extern int DisAsmPrintGadget(DisAsmInfoPtr disAsmInfoPtr, DisAsmPtr pc, int doPrint);
+extern void DisAsmCommencement(void);
+extern void DisAsmInfoInit(DisAsmInfoType *x, DisAsmPtr start, DisAsmPtr end);
+extern int DisAsmPrintGadget(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc, int doPrint);
+extern void DisAsmFin(void);

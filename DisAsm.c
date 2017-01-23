@@ -22,7 +22,11 @@ static int DisAsmPrintf(void *b, const char *fmt, ...)
 	return result;
 }
 
-void DisAsmInfoInit(DisAsmInfoPtr disAsmInfoPtr, DisAsmPtr start, DisAsmPtr end)
+void DisAsmCommencement(void)
+{
+} // DisAsmCommencement()
+
+void DisAsmInfoInit(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr start, DisAsmPtr end)
 {
 	memset(disAsmInfoPtr, 0, sizeof(*disAsmInfoPtr));
 
@@ -44,15 +48,16 @@ void DisAsmInfoInit(DisAsmInfoPtr disAsmInfoPtr, DisAsmPtr start, DisAsmPtr end)
         disAsmInfoPtr->info.buffer                    = start;
 } // DisAsmInfoInit()
 
-int DisAsmPrintGadget(DisAsmInfoPtr disAsmInfoPtr, DisAsmPtr pc, int doPrint)
+int DisAsmPrintGadget(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc, int doPrint)
 {
         DisAsmPtr end = disAsmInfoPtr->info.buffer + disAsmInfoPtr->info.buffer_length;
 	int instructions = 0;
 
         for (DisAsmPtr pc0 = pc; pc0 < end;)
         {
-                int good = memory[(unsigned long)pc0] == 0xC3; // ret
-                int bad  = memory[(unsigned long)pc0] == 0xE9; // jmp
+                unsigned char b = *((unsigned char *) pc0);
+                int good = b == 0xC3; // ret
+                int bad  = ((b == 0xE9) || (b == 0xEA) || (b == 0xEB) || (b == 0xFF)); // jmps. ToDo: More work here
 
                 disAsmInfoPtr->disAsmPrintBuffer.index = 0;
 
@@ -65,7 +70,7 @@ int DisAsmPrintGadget(DisAsmInfoPtr disAsmInfoPtr, DisAsmPtr pc, int doPrint)
 		{
                 	for (int i = 0; i < 8; i++)
                 		if (i < count)
-                        		printf("%02x", memory[(unsigned long) pc0 + i]);
+                        		printf("%02x", *((unsigned char *) ((unsigned long) pc0 ) + i));
                 		else
                         		printf("  ");
                		printf("  %s\n", disAsmInfoPtr->disAsmPrintBuffer.data);
@@ -81,3 +86,7 @@ int DisAsmPrintGadget(DisAsmInfoPtr disAsmInfoPtr, DisAsmPtr pc, int doPrint)
 
         return 0;
 } // DisAsmPrintGadget()
+
+void DisAsmFin(void)
+{
+} // DisAsmFin()
