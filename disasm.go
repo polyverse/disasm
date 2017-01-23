@@ -3,15 +3,15 @@ package disasm
 // #include "disasm.h"
 import "C"
 
-type DisAsmPtr uintptr
-type DisAsmInfoType C.struct_DisAsmInfo;
+type Ptr uintptr
+type InfoType C.struct_DisAsmInfo;
 
-func DisAsmInfoInit(disAsmInfoPtr *DisAsmInfoType, start DisAsmPtr, end DisAsmPtr) {
-	C.DisAsmInfoInit(disAsmInfoPtr, start, end);
+func InfoInit(infoPtr *InfoType, start Ptr, end Ptr) {
+	C.DisAsmInfoInit(infoPtr, start, end);
 	return;
-} // DisAsmInfoInit()
+} // InfoInit()
 
-func DisAsmPrintGadget(disAsmInfoPtr *DisAsmInfoType, pc DisAsmPtr, doPrint bool) int {
+func PrintGadget(infoPtr *InfoType, pc Ptr, doPrint bool) int {
 	var b C.int; if doPrint { b = 1; } else { b = 0; } 
-	return int(C.DisAsmPrintGadget(disAsmInfoPtr, pc, b));
-} // DisAsmPrintGadget()
+	return int(C.DisAsmPrintGadget(infoPtr, pc, b));
+} // PrintGadget()

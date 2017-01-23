@@ -5,19 +5,19 @@ import "fmt"
 
 func TestDisAsm(t *testing.T) {
 	// Two dummy functions that "bracket" disasm.c (for demonstration purposes)
-        start := DisAsmPtr(0x40029bb); // Clearly, these two values only worked once.
-        end   := DisAsmPtr(0x4002a09); // Fix these, go get a real test.
+        start := Ptr(0x40029bb); // Clearly, these two values only worked once.
+        end   := Ptr(0x4002a09); // Fix these, go get a real test.
 
-	var DisAsmInfo DisAsmInfoType
-	DisAsmInfoInit(&DisAsmInfo, start, end);
+	var info InfoType
+	InfoInit(&info, start, end);
 
 	gadgets := 0;
 	for pc := start; pc < end; pc = pc + 1 {
-		instructions := DisAsmPrintGadget(&DisAsmInfo, pc, false);
+		instructions := PrintGadget(&info, pc, false);
 
 		if (instructions > 0) {
 			fmt.Printf("GADGET AT: 0x%x (Length: %d)\n", pc, instructions);
-			DisAsmPrintGadget(&DisAsmInfo, pc, true);
+			PrintGadget(&info, pc, true);
 			fmt.Printf("\n");
 			gadgets++;
 		} // if
