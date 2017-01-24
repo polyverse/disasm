@@ -6,7 +6,7 @@
 
 static void DisAsmPrintAddress(bfd_vma addr, struct disassemble_info *info)
 {
-        info->fprintf_func(info->stream, "0x%lx", addr);
+        info->fprintf_func(info->stream, "%p", addr);
 } // DisAsmPrintAddress()
 
 static int DisAsmPrintf(void *b, const char *fmt, ...)
@@ -61,7 +61,7 @@ int DisAsmPrintGadget(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc, int doPrint)
                 disAsmInfoPtr->disAsmPrintBuffer.index = 0;
 
                 if (doPrint)
-			printf("0x%p  ", pc0);
+			printf("%p  ", pc0);
                 int count = (int) print_insn_i386((unsigned long) pc0, &disAsmInfoPtr->info);
                 assert(count != 0);
 
