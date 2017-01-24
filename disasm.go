@@ -27,15 +27,14 @@ func InfoInit(start Ptr, end Ptr) Info {
 } // InfoInit()
 
 func PrintGadget(info Info, pc Ptr, doPrint bool) int {
-	var b C.int
 	if doPrint {
-		b = 1
+		return int(C.DisAsmPrintGadget(info.info.info, pc, 1))
 	} else {
-		b = 0
+		return int(C.DisAsmPrintGadget(info.info.info, pc, 0))
 	}
-	return int(C.DisAsmPrintGadget(info.info.info, pc, b))
 } // PrintGadget()
 
 func InfoFree(i *iInfo) {
 	C.DisAsmInfoFree(i.info)
+	i.info = nil
 } // InfoFree()
