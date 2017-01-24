@@ -3,6 +3,7 @@
 #include "dis-asm.h"
 
 typedef void *DisAsmPtr;
+typedef unsigned long DisAsmLen;
 
 typedef struct DisAsmPrintBuffer {
 	int	index;
@@ -14,7 +15,7 @@ typedef struct DisAsmInfo {
 	DisAsmPrintBufferType disAsmPrintBuffer;
 } DisAsmInfoType, *DisAsmInfoPtr;
 
-extern DisAsmInfoPtr DisAsmInfoInit(DisAsmPtr start, DisAsmPtr end);
+extern DisAsmInfoPtr DisAsmInfoInit(DisAsmPtr start, DisAsmLen length);
 extern int DisAsmPrintInstruction(DisAsmInfoPtr disAsmInfoPtr, DisAsmPtr pc, int doPrint);
 extern int DisAsmPrintGadget(DisAsmInfoPtr disAsmInfoPtr, DisAsmPtr pc, int doPrint);
 extern void DisAsmInfoFree(DisAsmInfoPtr disAsmInfoPtr);

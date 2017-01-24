@@ -26,9 +26,10 @@ var bytes = [...]byte {0x8b,0x8d,0x48,0xff,0xff,0xff,0x48,0x8b,0x05,0x81,0x11,0x
 
 func TestDisAsm(t *testing.T) {
         start := Ptr(unsafe.Pointer(&bytes[0]))
-        end := Ptr(uintptr(start) + uintptr(len(bytes)))
+	length := Len(len(bytes))
+	end := Ptr(unsafe.Pointer(&bytes[length-1]))
 
-        info := InfoInit(start, end)
+        info := InfoInit(start, length)
 
         gadgets := 0
         for pc := start; pc < end; pc = pc + 1 {

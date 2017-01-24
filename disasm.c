@@ -23,7 +23,7 @@ static int DisAsmPrintf(void *b, const char *fmt, ...)
 	return result;
 }
 
-DisAsmInfoPtr DisAsmInfoInit(DisAsmPtr start, DisAsmPtr end)
+DisAsmInfoPtr DisAsmInfoInit(DisAsmPtr start, DisAsmLen length)
 {
 	DisAsmInfoPtr disAsmInfoPtr = calloc(1, sizeof(*disAsmInfoPtr));
 
@@ -41,7 +41,7 @@ DisAsmInfoPtr DisAsmInfoInit(DisAsmPtr start, DisAsmPtr end)
         disAsmInfoPtr->info.symbol_is_valid           = generic_symbol_is_valid;
         disAsmInfoPtr->info.display_endian            = BFD_ENDIAN_LITTLE;
         disAsmInfoPtr->info.buffer_vma                = (unsigned long) start;
-        disAsmInfoPtr->info.buffer_length             = end-start;
+        disAsmInfoPtr->info.buffer_length             = length;
         disAsmInfoPtr->info.buffer                    = start;
 	
 	return disAsmInfoPtr;

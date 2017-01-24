@@ -6,6 +6,7 @@ import "C"
 import "runtime"
 
 type Ptr uintptr
+type Len uint64
 
 type iInfo struct {
 	info *C.struct_DisAsmInfo
@@ -15,10 +16,8 @@ type Info struct {
 	info *iInfo
 }
 
-type InfoPtr uintptr
-
-func InfoInit(start Ptr, end Ptr) Info {
-	cinfo := C.DisAsmInfoInit(start, end)
+func InfoInit(start Ptr, length Len) Info {
+	cinfo := C.DisAsmInfoInit(start, C.DisAsmLen(length))
 	iinfo := &iInfo{cinfo}
 	runtime.SetFinalizer(iinfo, InfoFree)
 	info := Info{iinfo}
