@@ -13,6 +13,10 @@ static int DisAsmPrintf(void *b, const char *fmt, ...)
 {
 	DisAsmPrintBufferPtr pbPtr = (DisAsmPrintBufferPtr) b;
 
+	// Buffer has to be way bigger than it needs to be since no pre-flight is possible
+	if (pbPtr->index + 100 > sizeof(pbPtr->data))
+		return 0;
+
 	va_list arglist;
 	va_start(arglist, fmt);
 	int result = vsprintf(pbPtr->data + pbPtr->index, fmt, arglist);
