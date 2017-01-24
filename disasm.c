@@ -13,10 +13,6 @@ static int DisAsmPrintf(void *b, const char *fmt, ...)
 {
 	DisAsmPrintBufferPtr pbPtr = (DisAsmPrintBufferPtr) b;
 
-	// Buffer has to be way bigger than it needs to be since no pre-flight is possible
-	if (pbPtr->index + 100 > sizeof(pbPtr->data))
-		return 0;
-
 	va_list arglist;
 	va_start(arglist, fmt);
 	int result = vsprintf(pbPtr->data + pbPtr->index, fmt, arglist);
@@ -57,20 +53,10 @@ int DisAsmPrintInstruction(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc, int doPr
 	disAsmInfoPtr->disAsmPrintBuffer.index = 0;
 
 	if (doPrint)
-		printf("%p  ", pc);
+		DisAsmPrintf(disAsmInfoPtr->info.stream, "%p  ", pc);
 
 	int count = (int) print_insn_i386((unsigned long) pc, &disAsmInfoPtr->info);
 	assert(count != 0);
-
-	if (doPrint)
-	{
-		for (int i = 0; i < 8; i++)
-			if (i < count)
-				printf("%02x", *((unsigned char *) ((unsigned long) pc ) + i));
-			else
-				printf("  ");
-		printf("  %s\n", disAsmInfoPtr->disAsmPrintBuffer.data);
-	} // if
 
         return count;
 } // DisAsmPrintInstruction()
@@ -89,6 +75,9 @@ int DisAsmPrintGadget(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc, int doPrint)
                 disAsmInfoPtr->disAsmPrintBuffer.index = 0;
 
 		int count = DisAsmPrintInstruction(disAsmInfoPtr, pc0, doPrint);
+
+		if (doPrint)
+			printf("%s\n", disAsmInfoPtr->disAsmPrintBuffer.data);
 
                 pc0 += count;
 
