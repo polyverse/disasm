@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <memory.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include "disasm.h"
 
 static void DisAsmPrintAddress(bfd_vma addr, struct disassemble_info *info)
@@ -22,13 +23,9 @@ static int DisAsmPrintf(void *b, const char *fmt, ...)
 	return result;
 }
 
-void DisAsmCommencement(void)
+DisAsmInfoPtr DisAsmInfoInit(DisAsmPtr start, DisAsmPtr end)
 {
-} // DisAsmCommencement()
-
-void DisAsmInfoInit(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr start, DisAsmPtr end)
-{
-	memset(disAsmInfoPtr, 0, sizeof(*disAsmInfoPtr));
+	DisAsmInfoPtr disAsmInfoPtr = calloc(1, sizeof(*disAsmInfoPtr));
 
         disAsmInfoPtr->info.flavour                   = bfd_target_unknown_flavour;
         disAsmInfoPtr->info.arch                      = bfd_arch_i386;
@@ -46,6 +43,8 @@ void DisAsmInfoInit(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr start, DisAsmPtr en
         disAsmInfoPtr->info.buffer_vma                = (unsigned long) start;
         disAsmInfoPtr->info.buffer_length             = end-start;
         disAsmInfoPtr->info.buffer                    = start;
+	
+	return disAsmInfoPtr;
 } // DisAsmInfoInit()
 
 int DisAsmPrintGadget(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc, int doPrint)
@@ -87,6 +86,7 @@ int DisAsmPrintGadget(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc, int doPrint)
         return 0;
 } // DisAsmPrintGadget()
 
-void DisAsmFin(void)
+void DisAsmInfoFree(DisAsmInfoPtr disAsmInfoPtr)
 {
-} // DisAsmFin()
+	free(disAsmInfoPtr);
+} // DisAsmInfoFree()

@@ -8,16 +8,15 @@ func TestDisAsm(t *testing.T) {
 	start := Ptr(0x40029bb) // Clearly, these two values only worked once.
 	end := Ptr(0x4002a09)   // Fix these, go get a real test.
 
-	var info InfoType
-	InfoInit(&info, start, end)
+	info := InfoInit(start, end)
 
 	gadgets := 0
 	for pc := start; pc < end; pc = pc + 1 {
-		instructions := PrintGadget(&info, pc, false)
+		instructions := PrintGadget(info, pc, false)
 
 		if instructions > 0 {
 			fmt.Printf("GADGET AT: 0x%x (Length: %d)\n", pc, instructions)
-			PrintGadget(&info, pc, true)
+			PrintGadget(info, pc, true)
 			fmt.Printf("\n")
 			gadgets++
 		} // if
