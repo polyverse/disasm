@@ -15,5 +15,6 @@ typedef struct DisAsmInfo {
 } DisAsmInfoType, *DisAsmInfoPtr;
 
 extern DisAsmInfoPtr DisAsmInfoInit(DisAsmPtr start, DisAsmPtr end);
-extern int DisAsmPrintGadget(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc, int doPrint);
+extern int DisAsmPrintInstruction(DisAsmInfoPtr disAsmInfoPtr, DisAsmPtr pc, int doPrint);
+extern int DisAsmPrintGadget(DisAsmInfoPtr disAsmInfoPtr, DisAsmPtr pc, int doPrint);
 extern void DisAsmInfoFree(DisAsmInfoPtr disAsmInfoPtr);

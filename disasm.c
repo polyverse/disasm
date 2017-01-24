@@ -51,6 +51,30 @@ DisAsmInfoPtr DisAsmInfoInit(DisAsmPtr start, DisAsmPtr end)
 	return disAsmInfoPtr;
 } // DisAsmInfoInit()
 
+int DisAsmPrintInstruction(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc, int doPrint)
+{
+        DisAsmPtr end = disAsmInfoPtr->info.buffer + disAsmInfoPtr->info.buffer_length;
+	disAsmInfoPtr->disAsmPrintBuffer.index = 0;
+
+	if (doPrint)
+		printf("%p  ", pc);
+
+	int count = (int) print_insn_i386((unsigned long) pc, &disAsmInfoPtr->info);
+	assert(count != 0);
+
+	if (doPrint)
+	{
+		for (int i = 0; i < 8; i++)
+			if (i < count)
+				printf("%02x", *((unsigned char *) ((unsigned long) pc ) + i));
+			else
+				printf("  ");
+		printf("  %s\n", disAsmInfoPtr->disAsmPrintBuffer.data);
+	} // if
+
+        return count;
+} // DisAsmPrintInstruction()
+
 int DisAsmPrintGadget(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc, int doPrint)
 {
         DisAsmPtr end = disAsmInfoPtr->info.buffer + disAsmInfoPtr->info.buffer_length;
@@ -64,20 +88,7 @@ int DisAsmPrintGadget(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc, int doPrint)
 
                 disAsmInfoPtr->disAsmPrintBuffer.index = 0;
 
-                if (doPrint)
-			printf("%p  ", pc0);
-                int count = (int) print_insn_i386((unsigned long) pc0, &disAsmInfoPtr->info);
-                assert(count != 0);
-
-		if (doPrint)
-		{
-                	for (int i = 0; i < 8; i++)
-                		if (i < count)
-                        		printf("%02x", *((unsigned char *) ((unsigned long) pc0 ) + i));
-                		else
-                        		printf("  ");
-               		printf("  %s\n", disAsmInfoPtr->disAsmPrintBuffer.data);
-		} // if
+		int count = DisAsmPrintInstruction(disAsmInfoPtr, pc0, doPrint);
 
                 pc0 += count;
 
