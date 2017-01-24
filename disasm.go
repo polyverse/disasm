@@ -25,6 +25,14 @@ func InfoInit(start Ptr, length Len) Info {
 	return info
 } // InfoInit()
 
+func PrintInstruction(info Info, pc Ptr, doPrint bool) int {
+	if doPrint {
+		return int(C.DisAsmPrintInstruction (info.info.info, pc, 1))
+	} else {
+		return int(C.DisAsmPrintInstruction(info.info.info, pc, 0))
+	}
+} // DisAsmPrintInstruction()
+
 func PrintGadget(info Info, pc Ptr, doPrint bool) int {
 	if doPrint {
 		return int(C.DisAsmPrintGadget(info.info.info, pc, 1))
