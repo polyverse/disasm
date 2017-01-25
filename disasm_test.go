@@ -37,7 +37,7 @@ func TestDisAsm(t *testing.T) {
 
                 if bytesGadget > 0 {
                         fmt.Printf("GADGET AT: 0x%x (Length: %d)\n", pc, len(instructions))
-                        fmt.Printf("%v\n", instructions)
+                        fmt.Println(instructions)
                         gadgets++
                 } // if
         } // for
