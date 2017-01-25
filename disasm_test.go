@@ -1,7 +1,7 @@
 package disasm
 
-import "testing"
 import "fmt"
+import "testing"
 import "unsafe"
 
 /* Chunk of disassembly from /bin/ls
@@ -33,12 +33,11 @@ func TestDisAsm(t *testing.T) {
 
         gadgets := 0
         for pc := start; pc < end; pc = pc + 1 {
-                instructions := PrintGadget(info, pc, false)
+		bytesGadget, instructions := DecodeGadget(info, pc)
 
-                if instructions > 0 {
-                        fmt.Printf("GADGET AT: 0x%x (Length: %d)\n", pc, instructions)
-                        PrintGadget(info, pc, true)
-                        fmt.Printf("\n")
+                if bytesGadget > 0 {
+                        fmt.Printf("GADGET AT: 0x%x (Length: %d)\n", pc, len(instructions))
+                        fmt.Printf("%v\n", instructions)
                         gadgets++
                 } // if
         } // for

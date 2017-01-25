@@ -44,22 +44,25 @@ DisAsmInfoPtr DisAsmInfoInit(DisAsmPtr start, DisAsmLen length)
         disAsmInfoPtr->info.buffer_length             = length;
         disAsmInfoPtr->info.buffer                    = start;
 	
+	disAsmInfoPtr->start = start;
+	disAsmInfoPtr->end = start + length;
+
 	return disAsmInfoPtr;
 } // DisAsmInfoInit()
 
-int DisAsmPrintInstruction(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc, int doPrint)
+int DisAsmDecodeInstruction(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc)
 {
-        DisAsmPtr end = disAsmInfoPtr->info.buffer + disAsmInfoPtr->info.buffer_length;
 	disAsmInfoPtr->disAsmPrintBuffer.index = 0;
 
-	if (doPrint)
-		DisAsmPrintf(disAsmInfoPtr->info.stream, "%p  ", pc);
+        //DisAsmPrintf(disAsmInfoPtr->info.stream, "%p ", pc);
 
 	int count = (int) print_insn_i386((unsigned long) pc, &disAsmInfoPtr->info);
 	assert(count != 0);
 
+        //DisAsmPrintf(disAsmInfoPtr->info.stream, "\n");
+
         return count;
-} // DisAsmPrintInstruction()
+} // DisAsmDecodeInstruction()
 
 int DisAsmPrintGadget(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc, int doPrint)
 {
@@ -72,9 +75,7 @@ int DisAsmPrintGadget(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc, int doPrint)
                 int good = b == 0xC3; // ret
                 int bad  = ((b == 0xE9) || (b == 0xEA) || (b == 0xEB) || (b == 0xFF)); // jmps. ToDo: More work here
 
-                disAsmInfoPtr->disAsmPrintBuffer.index = 0;
-
-		int count = DisAsmPrintInstruction(disAsmInfoPtr, pc0, doPrint);
+		int count = DisAsmDecodeInstruction(disAsmInfoPtr, pc0);
 
 		if (doPrint)
 			printf("%s\n", disAsmInfoPtr->disAsmPrintBuffer.data);
