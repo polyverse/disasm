@@ -1,5 +1,6 @@
 package disasm
 
+import "encoding/json"
 import "fmt"
 import "testing"
 import "unsafe"
@@ -22,30 +23,28 @@ import "unsafe"
 */
 
 // These are the bytes
-var bytes = [...]byte {0x8b,0x8d,0x48,0xff,0xff,0xff,0x48,0x8b,0x05,0x81,0x11,0x00,0x00,0x48,0x8b,0x00,0x48,0x3b,0x45,0xd0,0x75,0x14,0x89,0xc8,0x48,0x81,0xc4,0x98,0x00,0x00,0x00,0x5b,0x41,0x5c,0x41,0x5d,0x41,0x5e,0x41,0x5f,0x5d,0xc3}
+var bytes = [...]byte{0x8b, 0x8d, 0x48, 0xff, 0xff, 0xff, 0x48, 0x8b, 0x05, 0x81, 0x11, 0x00, 0x00, 0x48, 0x8b, 0x00, 0x48, 0x3b, 0x45, 0xd0, 0x75, 0x14, 0x89, 0xc8, 0x48, 0x81, 0xc4, 0x98, 0x00, 0x00, 0x00, 0x5b, 0x41, 0x5c, 0x41, 0x5d, 0x41, 0x5e, 0x41, 0x5f, 0x5d, 0xc3}
 
 func TestDisAsm(t *testing.T) {
-        start := Ptr(unsafe.Pointer(&bytes[0]))
+	start := Ptr(unsafe.Pointer(&bytes[0]))
 	length := Len(len(bytes))
 	end := Ptr(unsafe.Pointer(&bytes[length-1]))
 
-        info := InfoInit(start, length)
+	info := InfoInit(start, length)
 
-        gadgets := 0
-        for pc := start; pc < end; pc = pc + 1 {
-		bytesGadget, instructions := DecodeGadget(info, pc)
+	var gadgets GadgetList
 
-                if bytesGadget > 0 {
-                        fmt.Printf("GADGET AT: 0x%x (Length: %d)\n", pc, len(instructions))
-                        fmt.Println(instructions)
-                        gadgets++
-                } // if
-        } // for
+	for pc := start; pc < end; pc = pc + 1 {
+		gadget, err := DecodeGadget(info, pc)
+		if err == nil {
+			gadgets = append(gadgets, *gadget)
+		} // if
+	} // for
 
-        fmt.Printf("GADGET COUNT BETWEEN 0x%x and 0x%x: %d (%d%%)\n", start, end, gadgets, gadgets*100/int((uintptr(end)-uintptr(start))))
-
-        // Fix me. start and end need to be set up with a dummy buffer that has predictable content
-        if gadgets == 0 {
-                t.Error("Failing, because start and end are very likely invalid addresses.")
-        } // if
+	numGadgets := len(gadgets)
+	fmt.Printf("GADGET COUNT BETWEEN 0x%x and 0x%x: %d (%d%%)\n", start, end, numGadgets, numGadgets*100/int((uintptr(end)-uintptr(start))))
+	s, err := json.Marshal(gadgets)
+	if err == nil {
+		fmt.Printf("%s\n", s)
+	}
 } // TestDisAsm()

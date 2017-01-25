@@ -64,33 +64,6 @@ int DisAsmDecodeInstruction(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc)
         return count;
 } // DisAsmDecodeInstruction()
 
-int DisAsmPrintGadget(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc, int doPrint)
-{
-        DisAsmPtr end = disAsmInfoPtr->info.buffer + disAsmInfoPtr->info.buffer_length;
-	int instructions = 0;
-
-        for (DisAsmPtr pc0 = pc; pc0 < end;)
-        {
-                unsigned char b = *((unsigned char *) pc0);
-                int good = b == 0xC3; // ret
-                int bad  = ((b == 0xE9) || (b == 0xEA) || (b == 0xEB) || (b == 0xFF)); // jmps. ToDo: More work here
-
-		int count = DisAsmDecodeInstruction(disAsmInfoPtr, pc0);
-
-		if (doPrint)
-			printf("%s\n", disAsmInfoPtr->disAsmPrintBuffer.data);
-
-                pc0 += count;
-
-		instructions++;
-
-                if (good ^ bad)
-                        return good ? instructions : 0;
-        } // for
-
-        return 0;
-} // DisAsmPrintGadget()
-
 void DisAsmInfoFree(DisAsmInfoPtr disAsmInfoPtr)
 {
 	free(disAsmInfoPtr);

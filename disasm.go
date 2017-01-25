@@ -3,6 +3,7 @@ package disasm
 // #include "disasm.h"
 import "C"
 
+import "errors"
 import "reflect"
 import "runtime"
 import "strings"
@@ -19,14 +20,29 @@ type Info struct {
 	info *iInfo
 }
 
-func Copy(s string) string { 
-        var b []byte 
-        h := (*reflect.SliceHeader)(unsafe.Pointer(&b)) 
-        h.Data = (*reflect.StringHeader)(unsafe.Pointer(&s)).Data 
-        h.Len = len(s) 
-        h.Cap = len(s) 
-        return string(b) 
-} 
+type Instruction struct {
+	Address Ptr    `json: "address"`
+	Octets  int    `json: "octets"`
+	DisAsm  string `json: "disasm"`
+}
+type InstructionList []Instruction
+
+type Gadget struct {
+	Address      Ptr             `json: "address"`
+	Octets       int             `json: "octets"`
+	Instructions InstructionList `json: "instructions"`
+}
+type GadgetList []Gadget
+
+func copy(s string) string {
+	var b []byte
+	h := (*reflect.SliceHeader)(unsafe.Pointer(&b))
+	h.Data = (*reflect.StringHeader)(unsafe.Pointer(&s)).Data
+	h.Len = len(s)
+	h.Cap = len(s)
+	return string(b)
+}
+
 func InfoInit(start Ptr, length Len) Info {
 	cinfo := C.DisAsmInfoInit(start, C.DisAsmLen(length))
 	iinfo := &iInfo{cinfo}
@@ -36,54 +52,43 @@ func InfoInit(start Ptr, length Len) Info {
 	return info
 } // InfoInit()
 
-func DecodeInstruction(info Info, pc Ptr) (int, string) {
-	disAsmInfoPtr := info.info.info;
+func DecodeInstruction(info Info, pc Ptr) (instruction *Instruction, err error) {
+        disAsmInfoPtr := info.info.info
 
-	bytes := int(C.DisAsmDecodeInstruction (disAsmInfoPtr, pc))
-	s := C.GoStringN(&disAsmInfoPtr.disAsmPrintBuffer.data[0], disAsmInfoPtr.disAsmPrintBuffer.index)
-	s = strings.TrimSpace(s)
+        bytes := int(C.DisAsmDecodeInstruction(disAsmInfoPtr, pc))
+        s := C.GoStringN(&disAsmInfoPtr.disAsmPrintBuffer.data[0], disAsmInfoPtr.disAsmPrintBuffer.index)
+        s = strings.TrimSpace(s)
 
-	return bytes, s 
+        return &Instruction{pc, bytes, s}, nil
 
-} // DisAsmPrintInstruction()
+} // DecodeInstruction()
 
-func DecodeGadget(info Info, pc Ptr) (int, []string) {
-	var disAsmInfoPtr C.DisAsmInfoPtr = info.info.info
-	var instructions []string
-	var bytesTotal int = 0
+func DecodeGadget(info Info, pc Ptr) (gadget *Gadget, err error) {
+        disAsmInfoPtr := info.info.info
+	g := Gadget{Address: pc, Octets: 0, Instructions: nil}
 
-        for pc0 := pc; pc0 < Ptr(disAsmInfoPtr.end);
-        {
-		var b byte = *(*byte)(unsafe.Pointer(pc0))
-                var good bool = b == 0xC3; // ret
-                var bad bool = ((b == 0xE9) || (b == 0xEA) || (b == 0xEB) || (b == 0xFF)); // jmps. ToDo: More work here
+        for pc0 := pc; pc0 < Ptr(disAsmInfoPtr.end); {
+                var b byte = *(*byte)(unsafe.Pointer(pc0))
+                var good bool = b == 0xC3                                                 // ret
+                var bad bool = ((b == 0xE9) || (b == 0xEA) || (b == 0xEB) || (b == 0xFF)) // jmps. ToDo: More work here
 
-                bytes, s := DecodeInstruction(info, pc0)
-		bytesTotal += bytes
-		instructions = append(instructions, s)
+                instruction, _ := DecodeInstruction(info, pc0)
+		g.Octets += instruction.Octets
+                g.Instructions = append(g.Instructions, *instruction)
 
-                pc0 = Ptr(uintptr(pc0) + uintptr(bytes))
+                pc0 = Ptr(uintptr(pc0) + uintptr(instruction.Octets))
 
-		if good {
-			return bytesTotal, instructions
-		} else if bad {
-			return 0, nil
-		}
+                if good {
+                        return &g, nil
+                } else if bad {
+                        return nil, errors.New("Encountered jmp instruction")
+                }
         } // for
 
-        return 0, nil
-} // DisAsmPrintGadget()
-
-func PrintGadget(info Info, pc Ptr, doPrint bool) int {
-        disAsmInfoPtr := info.info.info;
-        if doPrint {
-                return int(C.DisAsmPrintGadget(disAsmInfoPtr, pc, 1))
-        } else {
-                return int(C.DisAsmPrintGadget(disAsmInfoPtr, pc, 0))
-        }
-} // PrintGadget()
+	return nil, errors.New("Nothing found")
+} // DecodeGadget()
 
 func InfoFree(i *iInfo) {
-        C.DisAsmInfoFree(i.info)
-        i.info = nil
+	C.DisAsmInfoFree(i.info)
+	i.info = nil
 } // InfoFree()

@@ -19,5 +19,4 @@ typedef struct DisAsmInfo {
 
 extern DisAsmInfoPtr DisAsmInfoInit(DisAsmPtr start, DisAsmLen length);
 extern int DisAsmDecodeInstruction(DisAsmInfoPtr disAsmInfoPtr, DisAsmPtr pc);
-extern int DisAsmPrintGadget(DisAsmInfoPtr disAsmInfoPtr, DisAsmPtr pc, int doPrint);
 extern void DisAsmInfoFree(DisAsmInfoPtr disAsmInfoPtr);
