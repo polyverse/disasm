@@ -9,4 +9,4 @@ A gadget is currently defined as a block of code at some address that terminates
 go test .
 ```
 
-## The nuts and bolts of the disassembler were pulled from the GNU binutils package. Binutils is a heavily interdependent set of utilities that tends to pull in the kitchen sink, so I extracted the bare essentials for the sake of size and expediency. 
+### The nuts and bolts of the disassembler were pulled from the GNU binutils package. Binutils is a heavily interdependent set of utilities that tends to pull in the kitchen sink, so I extracted the bare essentials for the sake of size and expediency. 
