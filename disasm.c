@@ -6,7 +6,7 @@
 
 static void DisAsmPrintAddress(bfd_vma addr, struct disassemble_info *info)
 {
-        info->fprintf_func(info->stream, "%p", addr);
+        info->fprintf_func(info->stream, "%p", (void *) addr);
 } // DisAsmPrintAddress()
 
 static int DisAsmPrintf(void *b, const char *fmt, ...)
