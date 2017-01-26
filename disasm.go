@@ -22,16 +22,16 @@ type Info struct {
 }
 
 type Instruction struct {
-	Address Ptr    `json: "address"`
-	Octets  int    `json: "octets"`
-	DisAsm  string `json: "disasm"`
+	Address Ptr    //`json: "address"`
+	Octets  int    //`json: "octets"`
+	DisAsm  string //`json: "disasm"`
 }
 type InstructionList []Instruction
 
 type Gadget struct {
-	Address      Ptr             `json: "address"`
-	Octets       int             `json: "octets"`
-	Instructions InstructionList `json: "instructions"`
+	Address      Ptr             //`json: "address"`
+	Octets       int             //`json: "octets"`
+	Instructions InstructionList //`json: "instructions"`
 }
 type GadgetList []Gadget
 
@@ -53,6 +53,12 @@ func InfoInit(start Ptr, length Len) Info {
 	return info
 } // InfoInit()
 
+func AccessByte(info Info, pc Ptr) (byte, error) {
+        disAsmInfoPtr := info.info.info
+
+	return byte(C.DisAsmAccessByte(disAsmInfoPtr, pc)), nil
+} // AccessByte()
+
 func DecodeInstruction(info Info, pc Ptr) (instruction *Instruction, err error) {
         disAsmInfoPtr := info.info.info
 
@@ -69,7 +75,7 @@ func DecodeGadget(info Info, pc Ptr) (gadget *Gadget, err error) {
 	g := Gadget{Address: pc, Octets: 0, Instructions: nil}
 
         for pc0 := pc; pc0 < Ptr(disAsmInfoPtr.end); {
-                var b byte = *(*byte)(unsafe.Pointer(pc0))
+                var b byte = byte(C.DisAsmAccessByte(disAsmInfoPtr, pc0))
                 var good bool = b == 0xC3                                                 // ret
                 var bad bool = ((b == 0xE9) || (b == 0xEA) || (b == 0xEB) || (b == 0xFF)) // jmps. ToDo: More work here
 

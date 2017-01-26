@@ -50,6 +50,11 @@ DisAsmInfoPtr DisAsmInfoInit(DisAsmPtr start, DisAsmLen length)
 	return disAsmInfoPtr;
 } // DisAsmInfoInit()
 
+unsigned char DisAsmAccessByte(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc)
+{
+	return *((unsigned char *) pc);
+} // DisAsmAccessByte()
+
 int DisAsmDecodeInstruction(DisAsmInfoType *disAsmInfoPtr, DisAsmPtr pc)
 {
 	disAsmInfoPtr->disAsmPrintBuffer.index = 0;

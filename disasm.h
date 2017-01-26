@@ -18,5 +18,6 @@ typedef struct DisAsmInfo {
 } DisAsmInfoType, *DisAsmInfoPtr;
 
 extern DisAsmInfoPtr DisAsmInfoInit(DisAsmPtr start, DisAsmLen length);
+extern unsigned char DisAsmAccessByte(DisAsmInfoPtr disAsmInfoPtr, DisAsmPtr pc);
 extern int DisAsmDecodeInstruction(DisAsmInfoPtr disAsmInfoPtr, DisAsmPtr pc);
 extern void DisAsmInfoFree(DisAsmInfoPtr disAsmInfoPtr);
