@@ -5,10 +5,8 @@ package disasm
 import "C"
 
 import "errors"
-import "reflect"
 import "runtime"
 import "strings"
-import "unsafe"
 
 type Ptr uintptr
 type Len uint64
@@ -35,14 +33,13 @@ type Gadget struct {
 }
 type GadgetList []Gadget
 
-func copy(s string) string {
-	var b []byte
-	h := (*reflect.SliceHeader)(unsafe.Pointer(&b))
-	h.Data = (*reflect.StringHeader)(unsafe.Pointer(&s)).Data
-	h.Len = len(s)
-	h.Cap = len(s)
-	return string(b)
-}
+func SafeStartAddress() Ptr {
+	return Ptr(C.DisAsmSafeStartAddress())
+} // SafeStartAddress()
+
+func SafeEndAddress() Ptr {
+	return Ptr(C.DisAsmSafeEndAddress())
+} // SafeEndAddress()
 
 func InfoInit(start Ptr, length Len) Info {
 	cinfo := C.DisAsmInfoInit(start, C.DisAsmLen(length))
@@ -54,9 +51,7 @@ func InfoInit(start Ptr, length Len) Info {
 } // InfoInit()
 
 func AccessByte(info Info, pc Ptr) (byte, error) {
-        disAsmInfoPtr := info.info.info
-
-	return byte(C.DisAsmAccessByte(disAsmInfoPtr, pc)), nil
+	return byte(C.DisAsmAccessByte(info.info.info, pc)), nil
 } // AccessByte()
 
 func DecodeInstruction(info Info, pc Ptr) (instruction *Instruction, err error) {
