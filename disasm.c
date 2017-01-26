@@ -81,5 +81,5 @@ void DisAsmInfoFree(DisAsmInfoPtr disAsmInfoPtr)
 
 DisAsmPtr DisAsmSafeEndAddress(void)
 {
-	return DisAsmSafeEndAddress;
+	return DisAsmInfoFree;
 } // DisAsmSafeEndAddress()
