@@ -37,10 +37,6 @@ func SafeStartAddress() Ptr {
 	return Ptr(C.DisAsmSafeStartAddress())
 } // SafeStartAddress()
 
-func SafeEndAddress() Ptr {
-	return Ptr(C.DisAsmSafeEndAddress())
-} // SafeEndAddress()
-
 func InfoInit(start Ptr, length Len) Info {
 	cinfo := C.DisAsmInfoInit(start, C.DisAsmLen(length))
 	iinfo := &iInfo{cinfo}
@@ -94,3 +90,8 @@ func InfoFree(i *iInfo) {
 	C.DisAsmInfoFree(i.info)
 	i.info = nil
 } // InfoFree()
+
+func SafeEndAddress() Ptr {
+	return Ptr(C.DisAsmSafeEndAddress())
+} // SafeEndAddress()
+
