@@ -1,6 +1,7 @@
 package disasm
 
 // #include "disasm.h"
+// #cgo CFLAGS: -std=c99
 import "C"
 
 import "errors"
