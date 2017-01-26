@@ -25,7 +25,7 @@ static int DisAsmPrintf(void *b, const char *fmt, ...)
 
 DisAsmPtr DisAsmSafeStartAddress(void)
 {
-	return DisAsmSafeStartAddress;
+	return DisAsmInfoInit;
 } // DisAsmSafeStartAddress()
 
 DisAsmInfoPtr DisAsmInfoInit(DisAsmPtr start, DisAsmLen length)
