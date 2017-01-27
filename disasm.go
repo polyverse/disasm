@@ -37,8 +37,8 @@ func SafeStartAddress() Ptr {
 	return Ptr(C.DisAsmSafeStartAddress())
 } // SafeStartAddress()
 
-func InfoInit(start Ptr, length Len) Info {
-	cinfo := C.DisAsmInfoInit(start, C.DisAsmLen(length))
+func InfoInit(start Ptr, end Ptr) Info {
+	cinfo := C.DisAsmInfoInit(start, C.DisAsmLen(end - start + 1))
 	iinfo := &iInfo{cinfo}
 	runtime.SetFinalizer(iinfo, InfoFree)
 	info := Info{iinfo}
