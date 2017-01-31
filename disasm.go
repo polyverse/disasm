@@ -69,8 +69,8 @@ func DecodeGadget(info Info, pc Ptr, instructions Len, octets Len) (gadget *Gadg
 
         for pc0 := pc; pc0 <= Ptr(disAsmInfoPtr.end); {
                 var b byte = byte(C.DisAsmAccessByte(disAsmInfoPtr, pc0))
-                var good bool = b == 0xC3                                                 // ret
-                var bad bool = ((b == 0xE9) || (b == 0xEA) || (b == 0xEB) || (b == 0xFF)) // jmps. ToDo: More work here
+                var good bool = ((b == 0xC2) || (b == 0xC3) || (b == 0xCA) || (b == 0xCB) || (b == 0xEA))
+                var bad bool = ((b == 0xE9) || (b == 0xEB) || (b == 0xFF)) // Need to add CALL ABSOLUTE here
 
                 instruction, err := DecodeInstruction(info, pc0)
 		if err != nil {
