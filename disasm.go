@@ -7,6 +7,7 @@ import "C"
 import "errors"
 import "runtime"
 import "strings"
+import "regexp"
 
 type Ptr uintptr
 type Len uint64
@@ -58,8 +59,10 @@ func DecodeInstruction(info Info, pc Ptr) (instruction *Instruction, err error) 
 		s := C.GoStringN(&disAsmInfoPtr.disAsmPrintBuffer.data[0], disAsmInfoPtr.disAsmPrintBuffer.index)
 		if !strings.Contains(s, "(bad)") {
 			s = strings.TrimSpace(s)
-			s = strings.Replace(s, "    ", " ", -1)
-			s = strings.Replace(s, "  ", " ", -1)
+			r := regexp.MustCompile(" +")
+			s = r.ReplaceAllString(s, " ")
+			//s = strings.Replace(s, "    ", " ", -1)
+			//s = strings.Replace(s, "  ", " ", -1)
 
         		return &Instruction{pc, Len(octets), s}, nil
 		} // if
