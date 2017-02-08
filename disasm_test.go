@@ -44,8 +44,9 @@ func TestDisAsm(t *testing.T) {
 	} //for
 
 	numInstructions := len(instructions)
-	fmt.Printf("INSTRUCTION COUNT BETWEEN 0x%x and 0x%x: %d\n", start, end, numInstructions )
-	is, err := json.Marshal(instructions)
+
+	fmt.Printf("INSTRUCTION COUNT BETWEEN %s and %s: %d\n", start, end, numInstructions )
+	is, err := json.MarshalIndent(instructions, "", "    ")
 	if err == nil {
 		fmt.Printf("%s\n", is)
 	} // if
@@ -60,8 +61,8 @@ func TestDisAsm(t *testing.T) {
 	} // for
 
 	numGadgets := len(gadgets)
-	fmt.Printf("GADGET COUNT BETWEEN 0x%x and 0x%x: %d (%d%%)\n", start, end, numGadgets, numGadgets*100/int((uintptr(end)-uintptr(start))))
-	gs, err := json.Marshal(gadgets)
+	fmt.Printf("GADGET COUNT BETWEEN %s and %s: %d (%d%%)\n", start, end, numGadgets, numGadgets*100/int((uintptr(end)-uintptr(start))))
+	gs, err := json.MarshalIndent(gadgets, "", "    ")
 	if err == nil {
 		fmt.Printf("%s\n", gs)
 	}

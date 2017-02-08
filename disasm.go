@@ -4,9 +4,11 @@ package disasm
 // #cgo CFLAGS: -std=c99
 import "C"
 
+import "encoding/json"
 import "errors"
 import "runtime"
 import "strings"
+import "strconv"
 import "regexp"
 
 type Ptr uintptr
@@ -21,18 +23,44 @@ type Info struct {
 }
 
 type Instruction struct {
-	Address Ptr    //`json: "address"`
-	Octets  Len    //`json: "octets"`
-	DisAsm  string //`json: "disasm"`
+	Address Ptr    `json:"address,string"`
+	Octets  Len    `json:"octets,string"`
+	DisAsm  string `json:"disasm"`
 }
 type InstructionList []Instruction
 
 type Gadget struct {
-	Address      Ptr             //`json: "address"`
-	Octets       Len             //`json: "octets"`
-	Instructions InstructionList //`json: "instructions"`
+	Address      Ptr             `json:"address,string"`
+	Octets       Len             `json:"octets,string"`
+	Instructions InstructionList `json:"instructions"`
 }
 type GadgetList []Gadget
+
+func (p Ptr) String() string {
+	return "0x" + strconv.FormatUint(uint64(p), 16)
+}
+
+func (i *Instruction) MarshalJSON() ([]byte, error) {
+        type Alias Instruction
+        return json.Marshal(&struct {
+                Address string `json:"address"`
+                *Alias
+        }{
+                Address: i.Address.String(),
+                Alias:   (*Alias)(i),
+        })
+}
+
+func (g *Gadget) MarshalJSON() ([]byte, error) {
+        type Alias Gadget
+        return json.Marshal(&struct {
+                Address string `json:"address"`
+                *Alias
+        }{
+                Address: g.Address.String(),
+                Alias:   (*Alias)(g),
+        })
+}
 
 func SafeStartAddress() Ptr {
 	return Ptr(C.DisAsmSafeStartAddress())
