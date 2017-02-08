@@ -24,14 +24,14 @@ type Info struct {
 
 type Instruction struct {
 	Address Ptr    `json:"address,string"`
-	Octets  Len    `json:"octets,string"`
+	Octets  int    `json:"octets"`
 	DisAsm  string `json:"disasm"`
 }
 type InstructionList []Instruction
 
 type Gadget struct {
 	Address      Ptr             `json:"address,string"`
-	Octets       Len             `json:"octets,string"`
+	Octets       int             `json:"octets"`
 	Instructions InstructionList `json:"instructions"`
 }
 type GadgetList []Gadget
@@ -82,7 +82,7 @@ func AccessByte(info Info, pc Ptr) (byte, error) {
 func DecodeInstruction(info Info, pc Ptr) (instruction *Instruction, err error) {
         disAsmInfoPtr := info.info.info
 
-        octets := C.DisAsmDecodeInstruction(disAsmInfoPtr, pc)
+        octets := int(C.DisAsmDecodeInstruction(disAsmInfoPtr, pc))
 	if octets > 0 {
 		s := C.GoStringN(&disAsmInfoPtr.disAsmPrintBuffer.data[0], disAsmInfoPtr.disAsmPrintBuffer.index)
 		if !strings.Contains(s, "(bad)") {
@@ -90,14 +90,14 @@ func DecodeInstruction(info Info, pc Ptr) (instruction *Instruction, err error) 
 			r := regexp.MustCompile(" +")
 			s = r.ReplaceAllString(s, " ")
 
-        		return &Instruction{pc, Len(octets), s}, nil
+        		return &Instruction{pc, octets, s}, nil
 		} // if
 	} // if
 
 	return nil, errors.New("Error with disassembly")
 } // DecodeInstruction()
 
-func DecodeGadget(info Info, pc Ptr, instructions Len, octets Len) (gadget *Gadget, err error) {
+func DecodeGadget(info Info, pc Ptr, instructions int, octets int) (gadget *Gadget, err error) {
         disAsmInfoPtr := info.info.info
 	g := Gadget{Address: pc, Octets: 0, Instructions: nil}
 
@@ -114,7 +114,7 @@ func DecodeGadget(info Info, pc Ptr, instructions Len, octets Len) (gadget *Gadg
 		g.Octets += instruction.Octets
                 g.Instructions = append(g.Instructions, *instruction)
 
-		if (g.Octets > octets) || (Len(len(g.Instructions)) > instructions) {
+		if (g.Octets > octets) || (len(g.Instructions) > instructions) {
 			return nil, errors.New("Limits exceeded")
 		} // if
  
