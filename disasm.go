@@ -117,6 +117,20 @@ func InfoInit(s Ptr, e Ptr) Info {
 	return info
 } // InfoInit()
 
+func InfoInitBytes(s Ptr, e Ptr, b []byte) Info {
+	l := Len(e - s + 1)
+	if l != Len(len(b)) {
+		panic("Disallowed assertion")
+	}
+
+	cinfo := C.DisAsmInfoInitBytes(s, e, unsafe.Pointer(&b[0]))
+	iinfo := &iInfo{cinfo}
+	runtime.SetFinalizer(iinfo, InfoFree)
+	info := Info{info: iinfo, start: s, end: e, length: l, memory: b}
+
+	return info
+} // InfoInitBytes()
+
 func DecodeInstruction(info Info, pc Ptr) (instruction *Instruction, err error) {
         disAsmInfoPtr := info.info.info
 
