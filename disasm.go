@@ -176,7 +176,7 @@ func DecodeGadget(info Info, pc Ptr, instructions int, numOctets int) (gadget *G
                 pc0 = Ptr(uintptr(pc0) + uintptr(instruction.NumOctets))
 
                 if good {
-			signature := crc32.ChecksumIEEE(C.GoBytes(unsafe.Pointer(g.Address), C.int(g.NumOctets)))
+			signature := crc32.ChecksumIEEE(info.memory[pc-info.start:pc+Ptr(g.NumOctets)-info.start])
 			g.Signature = Sig((signature / math.MaxUint16) ^ (signature % math.MaxUint16))
                         return &g, nil
                 } else if bad {
