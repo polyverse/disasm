@@ -30,9 +30,10 @@ type Info struct {
 }
 
 type Instruction struct {
-	Address   Ptr    `json:"address,string"`
-	NumOctets int    `json:"numOctets"`
-	DisAsm    string `json:"disasm"`
+	Address   Ptr     `json:"address,string"`
+	NumOctets int     `json:"numOctets"`
+	Bytes     *[]byte `json:"bytes"`
+	DisAsm    string  `json:"disasm"`
 }
 
 type Gadget struct {
@@ -54,6 +55,7 @@ func (s Sig) String() string {
 }
 
 func (i *Instruction) String() string {
+/*
 	b := C.GoBytes(unsafe.Pointer(i.Address), C.int(i.NumOctets))
 	s := i.Address.String() + " "
 
@@ -69,6 +71,8 @@ func (i *Instruction) String() string {
 	} // for
 
         return s + " " + i.DisAsm
+*/
+	return i.DisAsm
 }
 
 /*
@@ -139,7 +143,7 @@ func DecodeInstruction(info Info, pc Ptr) (instruction *Instruction, err error) 
 		s := C.GoStringN(&disAsmInfoPtr.disAsmPrintBuffer.data[0], disAsmInfoPtr.disAsmPrintBuffer.index)
 		s = strings.TrimRight(s, " ")
 
-       		return &Instruction{pc, numOctets, s}, nil
+       		return &Instruction{Address: pc, NumOctets: numOctets, Bytes: nil, DisAsm: s}, nil
 	} // if
 
 	return nil, errors.New("Error with disassembly")
