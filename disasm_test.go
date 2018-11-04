@@ -33,20 +33,20 @@ func TestDisAsm(t *testing.T) {
 	//info := InfoInit(start, end)
 	info := InfoInitBytes(start, end, bytes[:])
 
-	var instructions []Instruction
+	var instructions []*Instruction
 
 	for pc := start; pc <= end; {
 		instruction, err := DecodeInstruction(info, pc)
 		if err != nil {
-			break;
+			break
 		} // if
-		instructions = append(instructions, *instruction)
-		pc = Ptr(uintptr(pc) + uintptr(instruction.NumOctets))
+		instructions = append(instructions, instruction)
+		pc = Ptr(uintptr(pc) + uintptr(len(instruction.Octets)))
 	} //for
 
 	numInstructions := len(instructions)
 
-	fmt.Printf("INSTRUCTION COUNT BETWEEN %s and %s: %d\n", start, end, numInstructions )
+	fmt.Printf("INSTRUCTION COUNT BETWEEN %s and %s: %d\n", start, end, numInstructions)
 	is, err := json.MarshalIndent(instructions, "", "    ")
 	if err == nil {
 		fmt.Printf("%s\n", is)
