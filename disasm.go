@@ -169,7 +169,8 @@ func (i *Instruction) String() string {
 	//return i.DisAsm
 }
 
-func (g *Gadget) String() string {
+
+func (g *Gadget) InstructionString() string {
 	instrStr := ""
 	for _, instr := range g.Instructions {
 		if instrStr != "" {
@@ -177,9 +178,12 @@ func (g *Gadget) String() string {
 		}
 		instrStr = instrStr + instr.DisAsm
 	}
+	return instrStr
+}
 
+func (g *Gadget) String() string {
 	sAdr := strconv.FormatUint(uint64(g.Address), 16)
-	return "0x" + strings.Repeat("0", 12-len(sAdr)) + sAdr + ": " + instrStr
+	return "0x" + strings.Repeat("0", 12-len(sAdr)) + sAdr + ": " + g.InstructionString()
 }
 
 func InfoInit(s Ptr, e Ptr) Info {
