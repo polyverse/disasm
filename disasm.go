@@ -4,7 +4,6 @@ package disasm
 // #cgo CFLAGS: -std=c99
 import "C"
 
-import "encoding/json"
 import "errors"
 import "runtime"
 import "strings"
@@ -63,14 +62,6 @@ func (i *Instruction) String() string {
 	return s + " " + i.DisAsm
 
 	//return i.DisAsm
-}
-
-func (i *Instruction) MarshalJSON() ([]byte, error) {
-	return json.Marshal(i.String())
-}
-
-func (g *Gadget) MarshalJSON() ([]byte, error) {
-	return json.MarshalIndent(g, "", "  ")
 }
 
 func (g *Gadget) String() string {
