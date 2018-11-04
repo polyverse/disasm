@@ -36,7 +36,7 @@ func TestDisAsm(t *testing.T) {
 	var instructions []*Instruction
 
 	for pc := start; pc <= end; {
-		instruction, err := DecodeInstruction(info, pc)
+		instruction, err := info.DecodeInstruction(pc)
 		if err != nil {
 			break
 		} // if
@@ -48,15 +48,16 @@ func TestDisAsm(t *testing.T) {
 
 	fmt.Printf("INSTRUCTION COUNT BETWEEN %s and %s: %d\n", start, end, numInstructions)
 	is, err := json.MarshalIndent(instructions, "", "    ")
-	if err == nil {
-		fmt.Printf("%s\n", is)
-	} // if
+	if err != nil {
+		t.Errorf("Error Marshalling instructions: %v", err)
+	}
+	fmt.Printf("%s\n", is)
 
 	var gadgets []*Gadget
 	var sGadgets []string
 
 	for pc := start; pc <= end; pc = pc + 1 {
-		gadget, err := DecodeGadget(info, pc, length, length)
+		gadget, err := info.DecodeGadget(pc, 0, length, 0, length)
 		if err == nil {
 			gadgets = append(gadgets, gadget)
 			sGadgets = append(sGadgets, gadget.String())
@@ -67,13 +68,63 @@ func TestDisAsm(t *testing.T) {
 	fmt.Printf("GADGET COUNT BETWEEN %s and %s: %d (%d%%)\n", start, end, numGadgets, numGadgets*100/int((uintptr(end)-uintptr(start))))
 	fmt.Println("Marshalling gadgets")
 	gs, err := json.MarshalIndent(gadgets, "", "    ")
-	if err == nil {
-		fmt.Printf("%s\n", gs)
+	if err != nil {
+		t.Errorf("Error Marshalling gadgets: %v", err)
 	}
+	fmt.Printf("%s\n", gs)
 
 	fmt.Println("Marshalling string gadgets")
 	gs, err = json.MarshalIndent(sGadgets, "", "    ")
+	if err != nil {
+		t.Errorf("Error Marshalling gadget strings: %v", err)
+	}
+	fmt.Printf("%s\n", gs)
+} // TestDisAsm()
+
+func TestInfo_GetAllGadgets5(t *testing.T) {
+	start := Ptr(unsafe.Pointer(&bytes[0]))
+	length := len(bytes)
+	end := Ptr(unsafe.Pointer(&bytes[length-1]))
+
+	info := InfoInitBytes(start, end, bytes[:])
+	gadgets, errs := info.GetAllGadgets(2, 5, 0, 100)
+	numGadgets := len(gadgets)
+	fmt.Printf("Errors found %d\n", len(errs))
+	fmt.Printf("GADGET COUNT OF LENGTH 2-5 BETWEEN %s and %s: %d (%d%%)\n", start, end, numGadgets, numGadgets*100/int((uintptr(end)-uintptr(start))))
+	fmt.Println("Marshalling gadgets")
+
+	gadgetStrings := make([]string, 0, numGadgets)
+	for _, gadget := range gadgets {
+		gadgetStrings = append(gadgetStrings, gadget.String())
+	}
+
+	gs, err := json.MarshalIndent(gadgetStrings, "", "    ")
 	if err == nil {
 		fmt.Printf("%s\n", gs)
 	}
-} // TestDisAsm()
+}
+
+func TestInfo_GetAllGadgets1(t *testing.T) {
+	start := Ptr(unsafe.Pointer(&bytes[0]))
+	length := len(bytes)
+	end := Ptr(unsafe.Pointer(&bytes[length-1]))
+
+	info := InfoInitBytes(start, end, bytes[:])
+	gadgets, errs := info.GetAllGadgets(2, 2, 0, 100)
+	numGadgets := len(gadgets)
+	fmt.Printf("Errors found %d\n", len(errs))
+	fmt.Printf("GADGET COUNT OF LENGTH 2 BETWEEN %s and %s: %d (%d%%)\n", start, end, numGadgets, numGadgets*100/int((uintptr(end)-uintptr(start))))
+	fmt.Println("Marshalling gadgets")
+
+	gadgetStrings := make([]string, 0, numGadgets)
+	for _, gadget := range gadgets {
+		gadgetStrings = append(gadgetStrings, gadget.String())
+	}
+
+	gs, err := json.MarshalIndent(gadgetStrings, "", "    ")
+	if err != nil {
+		t.Errorf("Error Marshalling gadget strings: %v", err)
+	}
+	fmt.Printf("%s\n", gs)
+
+}
