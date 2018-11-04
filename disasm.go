@@ -13,10 +13,9 @@ import (
 	"unsafe"
 )
 
-var NoGadgetFound = errors.New("Nothing found")
+type Len uint64
 
 type Ptr uintptr
-type Len uint64
 
 func (p Ptr) String() string {
 	str := strconv.FormatUint(uint64(p), 16)
@@ -65,9 +64,9 @@ func (info *Info) GetAllGadgets(instructionsMin int, instructionsMax int, octets
 
 	for pc := info.start; pc <= info.end; pc = pc + 1 {
 		gadget, err := info.DecodeGadget(pc, instructionsMin, instructionsMax, octetsMin, octetsMax)
-		if err != nil && err != NoGadgetFound {
+		if err != nil {
 			errs = append(errs, err)
-		} else {
+		} else if gadget != nil {
 			gadgets = append(gadgets, gadget)
 		}
 	}
@@ -75,7 +74,12 @@ func (info *Info) GetAllGadgets(instructionsMin int, instructionsMax int, octets
 	return gadgets, errs
 }
 
-func (info *Info) DecodeGadget(pc Ptr, instructionsMin int, instructionsMax int, octetsMin int, octetsMax int) (gadget *Gadget, err error) {
+func (info *Info) DecodeGadget(pc Ptr,
+	instructionsMin int,
+	instructionsMax int,
+	octetsMin int,
+	octetsMax int) (*Gadget, error) {
+
 	g := &Gadget{
 		Address:      pc,
 		Instructions: []*Instruction{},
@@ -116,7 +120,7 @@ func (info *Info) DecodeGadget(pc Ptr, instructionsMin int, instructionsMax int,
 		}
 	} // for
 
-	return nil, NoGadgetFound
+	return nil, errors.New("No gadget found")
 } // DecodeGadget()
 
 func (info *Info) DecodeInstruction(pc Ptr) (instruction *Instruction, err error) {
