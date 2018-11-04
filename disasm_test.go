@@ -33,43 +33,45 @@ func TestDisAsm(t *testing.T) {
 	//info := InfoInit(start, end)
 	info := InfoInitBytes(start, end, bytes[:])
 
-	var instructions []Instruction
+	var instructions []*Instruction
 
 	for pc := start; pc <= end; {
 		instruction, err := DecodeInstruction(info, pc)
 		if err != nil {
-			break;
+			break
 		} // if
-		instructions = append(instructions, *instruction)
-		pc = Ptr(uintptr(pc) + uintptr(instruction.NumOctets))
+		instructions = append(instructions, instruction)
+		pc = Ptr(uintptr(pc) + uintptr(len(instruction.Octets)))
 	} //for
 
 	numInstructions := len(instructions)
 
-	fmt.Printf("INSTRUCTION COUNT BETWEEN %s and %s: %d\n", start, end, numInstructions )
+	fmt.Printf("INSTRUCTION COUNT BETWEEN %s and %s: %d\n", start, end, numInstructions)
 	is, err := json.MarshalIndent(instructions, "", "    ")
 	if err == nil {
 		fmt.Printf("%s\n", is)
 	} // if
 
-	var gadgets []Gadget
+	var gadgets []*Gadget
 	var sGadgets []string
 
 	for pc := start; pc <= end; pc = pc + 1 {
 		gadget, err := DecodeGadget(info, pc, length, length)
 		if err == nil {
-			gadgets = append(gadgets, *gadget)
+			gadgets = append(gadgets, gadget)
 			sGadgets = append(sGadgets, gadget.String())
 		} // if
 	} // for
 
 	numGadgets := len(gadgets)
 	fmt.Printf("GADGET COUNT BETWEEN %s and %s: %d (%d%%)\n", start, end, numGadgets, numGadgets*100/int((uintptr(end)-uintptr(start))))
+	fmt.Println("Marshalling gadgets")
 	gs, err := json.MarshalIndent(gadgets, "", "    ")
 	if err == nil {
 		fmt.Printf("%s\n", gs)
 	}
 
+	fmt.Println("Marshalling string gadgets")
 	gs, err = json.MarshalIndent(sGadgets, "", "    ")
 	if err == nil {
 		fmt.Printf("%s\n", gs)
