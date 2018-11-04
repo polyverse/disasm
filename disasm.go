@@ -58,17 +58,12 @@ type Info struct {
 	memory []byte
 }
 
-func (info *Info) GetAllGadgets(instructionsMin int, instructionsMax int, octetsMin int, octetsMax int) ([]*Gadget, []error) {
+func (info *Info) FindGadgets(instructionsMin int, instructionsMax int, octetsMin int, octetsMax int) ([]*Gadget, []error) {
 	gadgets := []*Gadget{}
 	errs := []error{}
 
-	for pc := info.start; pc <= info.end; pc = pc + 1 {
-		gadget, err := info.DecodeGadget(pc, instructionsMin, instructionsMax, octetsMin, octetsMax)
-		if err != nil {
-			errs = append(errs, err)
-		} else if gadget != nil {
-			gadgets = append(gadgets, gadget)
-		}
+	for _, gadgetSearchSpec := range gadgetSpecs {
+		indices := gadgetSearchSpec.opcode.FindAllIndex(info.memory, -1)
 	}
 
 	return gadgets, errs
@@ -87,10 +82,8 @@ func (info *Info) DecodeGadget(pc Ptr,
 
 	octetCount := 0
 
-	for pc0 := pc; pc0 <= info.end; {
-		var b = info.memory[pc0-info.start]
-		var good bool = ((b == 0xC2) || (b == 0xC3) || (b == 0xCA) || (b == 0xCB))
-		var bad bool = ((b == 0xE9) || (b == 0xEA) || (b == 0xEB) || (b == 0xFF)) // JMP, JMP, JMP, 0xFF
+
+	var nextGadEnd, gadSpec, err := info.FindNextGadgetEnd(pc)
 
 		instruction, err := info.DecodeInstruction(pc0)
 		if err != nil {
@@ -109,16 +102,13 @@ func (info *Info) DecodeGadget(pc Ptr,
 
 		pc0 = Ptr(uintptr(pc0) + uintptr(len(instruction.Octets)))
 
-		if good {
+		if validGadEnd {
 			if octetCount >= octetsMin && (len(g.Instructions) >= instructionsMin) {
 				return g, nil
 			} else {
 				return nil, errors.New("Gadget too short")
 			}
-		} else if bad {
-			return nil, errors.New("Encountered jmp instruction")
 		}
-	} // for
 
 	return nil, errors.New("No gadget found")
 } // DecodeGadget()
@@ -139,6 +129,38 @@ func (info *Info) DecodeInstruction(pc Ptr) (instruction *Instruction, err error
 
 	return nil, errors.New("Error with disassembly")
 } // DecodeInstruction()
+
+func (info *Info) FindNextGadgetEnd(pc Ptr) (*GadgetEnd) {
+
+	// Start sub-memory at offset to search from
+	subMemory := info.memory[pc:]
+
+	var closestGadEnd *gadgetEnd = nil
+
+	for _, gadSpec := range gadgetSpecs {
+		gadEndCandidate := gadSpec.opcode.FindIndex(subMemory)
+		if gadEndCandidate == nil {
+			continue
+		}
+		if closestGadEnd == nil || closestGadEnd.startOffset > gadEndCandidate[0] {
+			closestGadEnd = &gadgetEnd{
+				startOffset: gadEndCandidate[0],
+				endOffset: gadEndCandidate[1],
+			}
+
+			// Shorten sub-memory to next gadget + 10. Reduce search space
+			subMemory = info.memory[pc:pc+closestGadEnd.startOffset+maxGadgetLen]
+		}
+	}
+	if closestGadEnd == nil {
+		return nil
+	}
+
+	return &GadgetEnd{
+		StartOffset: Ptr(closestGadEnd.startOffset) + pc,
+		EndOffset: Ptr(closestGadEnd.endOffset) + pc,
+	}
+}
 
 type Instruction struct {
 	Address Ptr    `json:"address,string"`
@@ -172,7 +194,6 @@ func (i *Instruction) String() string {
 
 	//return i.DisAsm
 }
-
 
 func (g *Gadget) InstructionString() string {
 	instrStr := ""

@@ -1,6 +1,9 @@
 package disasm
 
-import "encoding/json"
+import (
+	"debug/elf"
+	"encoding/json"
+)
 import "fmt"
 import "testing"
 import "unsafe"
@@ -127,4 +130,37 @@ func TestInfo_GetAllGadgets1(t *testing.T) {
 	}
 	fmt.Printf("%s\n", gs)
 
+}
+
+func TestKnownFile(t *testing.T) {
+	path := "TestFiles/loop"
+	file, err := elf.Open(path)
+	if err != nil {
+		t.Errorf("Error opening ELF file %s: %v", path, err)
+	}
+
+	allGadgets := []*Gadget{}
+
+	for _, section := range file.Sections {
+		if section.Type == elf.SHT_PROGBITS {
+			progData, err := section.Data()
+			if err != nil {
+				t.Errorf("Unable to read data from section in ELF file %s: %v", path, err)
+			}
+			info := InfoInitBytes(Ptr(section.Addr), Ptr(section.Addr+section.Size-1), progData)
+			gadgets, _ := info.GetAllGadgets(1, 10, 0, 100)
+			allGadgets = append(allGadgets, gadgets...)
+		}
+	}
+
+	fmt.Printf("Dissecting loop, found %d gadgets", len(allGadgets))
+	gadgetStrings := make([]string, 0, len(allGadgets))
+	for _, gadget := range allGadgets {
+		gadgetStrings = append(gadgetStrings, gadget.String())
+	}
+	gs, err := json.MarshalIndent(gadgetStrings, "", "    ")
+	if err != nil {
+		t.Errorf("Error Marshalling gadget strings: %v", err)
+	}
+	fmt.Printf("%s\n", gs)
 }
