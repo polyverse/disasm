@@ -5,7 +5,7 @@ package disasm
 import "C"
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"fmt"
 	"runtime"
 	"strconv"
@@ -23,11 +23,39 @@ func (p Ptr) String() string {
 }
 
 func (p *Ptr) UnmarshalJSON(b []byte) error {
-	return errors.New("Unmarshalling not supported for Ptr")
+	if p == nil {
+		return errors.Errorf("Addr Unmarshall cannot operate on a nil pointer.")
+	}
+
+	str := string(b)
+	str = strings.TrimPrefix(str, "\"")
+	str = strings.TrimSuffix(str, "\"")
+
+	if !strings.HasPrefix(str, "0x") {
+		return errors.Errorf("Cannot unmarshall string %s into an address. "+
+			"It must be a hexadecimal value prefixed by 0x", str)
+	}
+
+	str = strings.TrimPrefix(str, "0x")
+	val, err := strconv.ParseUint(str, 16, 64)
+	if err != nil {
+		return errors.Wrapf(err, "Unable to parse hexadecimal value %s", str)
+	}
+	va := Ptr(val)
+	*p = va
+	return nil
 }
 
 func (p Ptr) MarshalJSON() ([]byte, error) {
 	return []byte("\"" + p.String() + "\""), nil
+}
+
+func (p *Ptr) UnmarshalText(b []byte) error {
+	return p.UnmarshalJSON(b)
+}
+
+func (p Ptr) MarshalText() ([]byte, error) {
+	return []byte(p.String()), nil
 }
 
 type Octets []byte
